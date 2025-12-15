@@ -106,7 +106,7 @@ async function syncEmails() {
               "❌ Error processing participant:",
               error?.response?.data || error
             );
-            // break; //todo  remove 
+            // break; //todo  remove
           }
         }
         // throw new Error("Testing error");

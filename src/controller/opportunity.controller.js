@@ -18,6 +18,7 @@ import { fetchCapsuleParty } from "../service/service.js";
 import { searchCompanyByName } from "../service/hubspot.service.js";
 import { createCompany } from "../service/hubspot.service.js";
 import { associateDealToCompany } from "../service/hubspot.service.js";
+import {updateDeal} from "../service/hubspot.service.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
@@ -96,17 +97,17 @@ async function syncOpportunities() {
           }
           // Associated company with dealId //todo
 
-          if (dealId && companyid) {
-            console.log("🔋companyid", companyid);
-            console.log("🔋dealId", dealId);
+          // if (dealId && companyid) {
+          //   console.log("🔋companyid", companyid);
+          //   console.log("🔋dealId", dealId);
 
-            const contactResult = await associateDealToCompany(
-              dealId,
-              companyid
-            );
+          //   const contactResult = await associateDealToCompany(
+          //     dealId,
+          //     companyid
+          //   );
 
-            console.log("Contact Associated with Company", contactResult);
-          }
+          //   console.log("Contact Associated with Company", contactResult);
+          // }
 
           // serach contact by email , and used loop here
 
@@ -123,27 +124,27 @@ async function syncOpportunities() {
               }
               // Assocaition conatact with deal and company
 
-              if (contactid && companyid) {
-                console.log("🔋contactid", contactid);
-                console.log("🔋companyid", companyid);
+              // if (contactid && companyid) {
+              //   console.log("🔋contactid", contactid);
+              //   console.log("🔋companyid", companyid);
 
-                const companyResult = await associateContactCompany(
-                  contactid,
-                  companyid
-                );
-                console.log("Contact Associated with Company", companyResult);
-              }
+              //   const companyResult = await associateContactCompany(
+              //     contactid,
+              //     companyid
+              //   );
+              //   console.log("Contact Associated with Company", companyResult);
+              // }
 
-              if (contactid && dealId) {
-                console.log("🔋contactid", contactid);
-                console.log("🔋dealId", dealId);
+              // if (contactid && dealId) {
+              //   console.log("🔋contactid", contactid);
+              //   console.log("🔋dealId", dealId);
 
-                const contactResult = await associateContactDeal(
-                  contactid,
-                  dealId
-                );
-                console.log("Contact Associated with Deal", contactResult);
-              }
+              //   const contactResult = await associateContactDeal(
+              //     contactid,
+              //     dealId
+              //   );
+              //   console.log("Contact Associated with Deal", contactResult);
+              // }
             } catch (err) {
               console.error("Error processing contact:", email, err);
             }

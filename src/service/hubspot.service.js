@@ -294,13 +294,8 @@ async function createContactInHubSpot(email) {
 //   }
 // }
 
-
-
-
-
 async function createEmailEngagement(contactId, emailData) {
   try {
-
     const payload = {
       properties: cleanProps({
         hs_timestamp: Date.now(),
@@ -343,7 +338,6 @@ async function createEmailEngagement(contactId, emailData) {
   }
 }
 
-
 // create hubspot to task
 // async function createHubSpotTask(taskData) {
 
@@ -353,7 +347,7 @@ async function createEmailEngagement(contactId, emailData) {
 //     "Content-Type": "application/json",
 //     Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
 //   };
-  
+
 //   const payload = {
 //       properties: {
 //         hs_task_subject: taskData.category?.name,
@@ -395,15 +389,27 @@ async function createHubSpotTask(taskData) {
     Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
   };
 
-  // Build properties
+  const statusMap = {
+    open: "NOT_STARTED",
+    pending: "DEFERRED",
+    in_progress: "IN_PROGRESS",
+    waiting: "WAITING",
+    completed: "COMPLETED",
+  };
+
+  const normalizedStatus = String(taskData.status || "")
+    .trim()
+    .toLowerCase();
+
   const properties = {
-    hs_task_subject: taskData.category?.name,
-    hs_task_body: taskData.description,
-    hs_task_status: taskData.status === "OPEN" ? "NOT_STARTED" : "COMPLETED",
-    hs_task_priority: "MEDIUM",
-    hs_timestamp: taskData.dueOn
-      ? `${taskData.dueOn}T09:00:00Z`
-      : new Date().toISOString(),
+    hs_task_subject: taskData.description,
+    hs_task_body: taskData.detail,
+    hs_task_status: statusMap[normalizedStatus],
+    // capsule_status: statusMap[normalizedStatus],
+    hs_timestamp: taskData.createdAt,
+    // hs_due_date: taskData.dueOn,
+    // hubspot_owner_id: taskData.id,
+
   };
 
   // Clean undefined/null before sending
@@ -417,7 +423,8 @@ async function createHubSpotTask(taskData) {
     const response = await axios.post(url, payload, { headers });
     console.log("Task created successfully:", response.data);
     return response.data;
-  } catch (error) {3
+  } catch (error) {
+    3;
     console.error(
       "Error creating HubSpot task:",
       error.response?.data || error
@@ -426,15 +433,10 @@ async function createHubSpotTask(taskData) {
   }
 }
 
-
-
-
-
 // Search company by name in hubspot
 
 async function searchCompanyByName(companyName) {
   try {
-
     if (!companyName) {
       console.log("Company name not provided");
       return {};
@@ -539,7 +541,7 @@ async function associateDealToCompany(dealId, companyId) {
   }
 }
 
-// Associated contact to Task 
+// Associated contact to Task
 
 async function associateContactToTask(contactId, taskId) {
   try {
@@ -552,7 +554,7 @@ async function associateContactToTask(contactId, taskId) {
         {
           from: { id: contactId },
           to: { id: taskId },
-          type: "contact_to_task",  // association type — usually contact_to_task or task_to_contact
+          type: "contact_to_task", // association type — usually contact_to_task or task_to_contact
         },
       ],
     };
@@ -574,7 +576,7 @@ async function associateContactToTask(contactId, taskId) {
   }
 }
 
-// Associated Tasks to company 
+// Associated Tasks to company
 
 async function associateTaskToCompany(taskId, companyId) {
   try {
@@ -612,6 +614,68 @@ async function associateTaskToCompany(taskId, companyId) {
   }
 }
 
+// Update deal in hubspot
+
+async function updateDeal(dealId, opportunity) {
+  try {
+    // -----------------------------
+    // 1. Stage Mapping (Capsule → HubSpot)
+    // -----------------------------
+    const stageMap = {
+      Lost: "closedlost",
+      Won: "closedwon",
+      Prospect: "appointmentscheduled",
+      Proposal: "qualifiedtobuy",
+    };
+
+    const safeDescription =
+      typeof opportunity.description === "string"
+        ? opportunity.description
+        : opportunity.description?.content || "";
+
+    const safeCloseDate = opportunity.expectedCloseOn
+      ? new Date(opportunity.expectedCloseOn).getTime()
+      : null;
+
+    const payload = {
+      properties: cleanProps({
+        dealname: opportunity.name || "",
+        description: safeDescription,
+        amount: opportunity.value?.amount || 0,
+        closedate: safeCloseDate,
+        capsule_stage: opportunity.milestone?.name || "",
+
+        pipeline: "default",
+        dealstage: stageMap[opportunity.milestone?.name] || null,
+      }),
+    };
+
+    console.log(`Updating Deal ${dealId} with payload:`, payload);
+
+    // -----------------------------
+    // 3. HubSpot UPDATE API (PATCH)
+    // -----------------------------
+    const response = await axios.patch(
+      `https://api.hubapi.com/crm/v3/objects/deals/${dealId}`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+        },
+      }
+    );
+
+    console.log("Deal Updated Successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error Updating Deal:",
+      error.response?.data || error.message
+    );
+    return {};
+  }
+}
 
 
 export {
@@ -626,5 +690,7 @@ export {
   createCompany,
   associateDealToCompany,
   associateContactToTask,
-  associateTaskToCompany
+  associateTaskToCompany,
+  updateDeal,
+  
 };

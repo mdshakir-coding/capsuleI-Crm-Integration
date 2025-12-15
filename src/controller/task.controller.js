@@ -17,6 +17,7 @@ import { createCompany } from "../service/hubspot.service.js";
 import { associateDealToCompany } from "../service/hubspot.service.js";
 import { associateContactToTask } from "../service/hubspot.service.js";
 import { associateTaskToCompany } from "../service/hubspot.service.js";
+import { fetchCapsuleUserById } from "../service/service.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
@@ -45,7 +46,7 @@ function loadProgress() {
   return 0;
 }
 
-// Function to sync tasks
+/*
 // Function to sync tasks
 async function syncTasks() {
   try {
@@ -58,9 +59,9 @@ async function syncTasks() {
     }
 
     // Clean invalid tasks BEFORE starting
-    const validTasks = tasks.filter((t) => t && typeof t === "object");
+    // const validTasks = tasks.filter((t) => t && typeof t === "object");
 
-    console.log(`Valid Tasks after cleaning: ${validTasks.length}`);
+    // console.log(`Valid Tasks after cleaning: ${validTasks.length}`);
 
     // Load progress
     let startIndex = loadProgress();
@@ -69,21 +70,26 @@ async function syncTasks() {
     // for (let i = startIndex; i < opportunities.length; i++) {
 
     // ✅ FIXED → loop through validTasks
-    for (let i = startIndex; i < validTasks.length; i++) {
-      const task = validTasks[i];
+    for (let i = startIndex; i < tasks.length; i++) {
+      const task = tasks[i];
 
-      if (!task.party?.id) {
-        console.error(`❌ Skipping invalid task at index ${i}:`, task);
+      if(task.id === 136280118) {
+        console.log("Task ID:", task);
+      }
+
+      if (task.id !== 136280118) {
+        // console.error(`❌ Skipping invalid task at index ${task.id}:`);
+        // saveProgress(i + 1);
         continue;
       }
 
-      console.log(`\n🔄 Syncing Task ${i + 1}/${validTasks.length}`);
+      // console.log(`\n🔄 Syncing Task ${i + 1}/${validTasks.length}`);
       console.log("Capsule Task ID:", task.id);
 
       try {
 
-        console.log("Proceesing task:",task); //todo remove this after testing
-        return;
+        // console.log("Proceesing task:",task); //todo remove this after testing
+        // return;
 
 
         let companyId = null;
@@ -166,6 +172,8 @@ async function syncTasks() {
 
         // Save progress
         saveProgress(i + 1);
+        console.log ("testing");
+        return; //todo remove after testing
 
         // Throw only for testing
         // throw new Error("Testing error stop");
@@ -189,4 +197,152 @@ async function syncTasks() {
     return;
   }
 }
+  */
+
+//old code
+
+async function syncTasks() {
+  try {
+    
+
+
+
+
+    const tasks = await fetchTasks(); // Fetch from Capsule 
+    console.log("Task Entries Fetched:", tasks?.length);
+
+    if (!tasks || tasks.length === 0) {
+      console.log("No tasks found to sync.");
+      return;
+    }
+
+    // Clean invalid tasks BEFORE starting
+    const validTasks = tasks.filter((t) => t && typeof t === "object");
+
+    console.log(`Valid Tasks after cleaning: ${validTasks.length}`);
+
+    // Load progress
+    let startIndex = loadProgress();
+
+    // ❌ WRONG → opportunities is not defined
+    // for (let i = startIndex; i < opportunities.length; i++) {
+
+    // ✅ FIXED → loop through validTasks
+    for (let i = startIndex; i < validTasks.length; i++) {
+      const task = validTasks[i];
+
+      if (!task.party?.id) {
+        console.error(`❌ Skipping invalid task at index ${i}:`, task);
+        continue;
+      }
+
+      console.log(`\n🔄 Syncing Task ${i + 1}/${validTasks.length}`);
+      console.log("Capsule Task ID:", task.id);
+
+    
+      try {
+        // console.log("Proceesing task:",task); //todo remove this after testing
+        // return;
+
+        let companyId = null;
+        let contactId = null;
+        let tasksId = null;
+
+        // Create HubSpot Task
+        const result = await createHubSpotTask(task);
+        console.log("✅ HubSpot Task Created:", result.id);
+
+        // Save HubSpot task ID
+        tasksId = result.id;
+
+        // Fetch the Capsule Party
+        const party = await fetchCapsuleParty(task.party?.id);
+        console.log("Capsule Party Fetched:", party.id);
+
+        // Search or create company
+        let company = await searchCompanyByName(party?.organisation?.name);
+        console.log("HubSpot Company Fetched:", company.id);
+        companyId = company.id;
+
+        if (!company) {
+          const company = await createCompany(party?.organisation?.name);
+          console.log("HubSpot Company Created:", company.id);
+          companyId = company.id;
+        }
+
+        // Associate task → company
+        // if (tasksId && companyId) {
+        //   const taskCompanyResult = await associateTaskToCompany(
+        //     tasksId,
+        //     companyId
+        //   );
+        //   console.log("Task → Company Associated:", taskCompanyResult);
+        // }
+
+        // Loop through all party contacts
+        for (const contact of party.emailAddresses) {
+          try {
+            let hubspotContact = await searchContactByEmail(contact.address);
+            console.log("HubSpot Contact Fetched:", hubspotContact.id);
+            contactId = hubspotContact.id;
+
+            if (!hubspotContact) {
+              hubspotContact = await createContactInHubSpot(contact);
+              console.log("HubSpot Contact Created:", hubspotContact.id);
+              contactId = hubspotContact.id;
+            } else {
+              console.log("HubSpot Contact Fetched:", hubspotContact.id);
+            }
+
+            // Associate contact → task
+            // if (contactId && tasksId) {
+            //   const contactResult = await associateContactToTask(
+            //     contactId,
+            //     tasksId
+            //   );
+            //   console.log("Contact → Task Associated:", contactResult);
+            // }
+
+            // Associate contact → company
+            // if (contactId && companyId) {
+            //   const companyResult = await associateContactCompany(
+            //     contactId,
+            //     companyId
+            //   );
+            //   console.log("Contact ↔ Company Associated:", companyResult);
+            // }
+          } catch (err) {
+            console.error(
+              "❌ Error creating HubSpot contact:",
+              err.response?.data || err.message
+            );
+          }
+        }
+
+        // Save progress
+        // saveProgress(i + 1);
+
+        // Throw only for testing
+        // throw new Error("Testing error stop");
+      } catch (err) {
+        console.error(
+          "❌ Error creating HubSpot task:",
+          err.response?.data || err.message
+        );
+
+        // saveProgress(i);
+        // break; //todo remove
+      }
+    }
+
+    console.log("🎉 All tasks synced successfully!");
+
+    // Throw only for testing
+    // throw new Error("Testing error stopping");
+  } catch (error) {
+    console.error("❌ syncTasks() failed:", error.message);
+    return;
+  }
+}
+
 export { syncTasks };
