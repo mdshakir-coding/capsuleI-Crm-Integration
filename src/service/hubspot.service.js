@@ -1,4 +1,6 @@
 import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 import { cleanProps } from "../utils/helper.js";
 
 // Associate Contact with Deal
@@ -381,7 +383,7 @@ async function createEmailEngagement(contactId, emailData) {
 
 // create hubspot to task used clear props()
 
-async function createHubSpotTask(taskData) {
+async function createHubSpotTask(taskData,ownerId) {
   const url = "https://api.hubapi.com/crm/v3/objects/tasks";
 
   const headers = {
@@ -406,10 +408,9 @@ async function createHubSpotTask(taskData) {
     hs_task_body: taskData.detail,
     hs_task_status: statusMap[normalizedStatus],
     // capsule_status: statusMap[normalizedStatus],
-    hs_timestamp: taskData.createdAt,
+    hs_timestamp: taskData.dueOn,
     // hs_due_date: taskData.dueOn,
-    // hubspot_owner_id: taskData.id,
-
+    hubspot_owner_id: ownerId,
   };
 
   // Clean undefined/null before sending
@@ -677,6 +678,76 @@ async function updateDeal(dealId, opportunity) {
   }
 }
 
+// fetch owner by email
+// async function getOwnerByEmail(email) {
+//   if (!email) return null;
+
+//   const url = "https://api.hubapi.com/owners/v2/owners";
+
+//   try {
+//     const response = await axios.get(url, {
+//       headers: {
+//         Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+//         Accept: "application/json",
+//       },
+//     });
+
+//     // const owners = response.data;
+
+//     // // Find owner by email (case-insensitive)
+//     // const owner = owners.find(
+//     //   (o) => o.email && o.email.toLowerCase() === email.toLowerCase()
+//     // );
+
+
+//     return response.data.results[0]|| {};
+//   } catch (error) {
+//     console.error(
+//       "Error fetching owner:",
+//       error.response?.data || error.message
+//     );
+//     return {};
+//   }
+// }
+
+// new code 
+
+async function getOwnerByEmail(email) {
+  if (!email) return null;
+
+  // console.log("Token:", process.env.HUBSPOT_API_KEY); // must NOT be undefined
+
+  try {
+    const response = await axios.get(
+      "https://api.hubapi.com/crm/v3/owners",
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+          Accept: "application/json",
+        },
+        params: {
+          email, // v3 supports email filter
+        },
+      }
+    );
+
+    // v3 response structure
+    return response.data.results?.[0] || null;
+
+  } catch (error) {
+    console.error(
+      "❌ Error fetching owner:",
+      error.response?.data || error.message
+    );
+    return {};
+  }
+}
+
+
+
+
+
+
 
 export {
   associateContactDeal,
@@ -692,5 +763,5 @@ export {
   associateContactToTask,
   associateTaskToCompany,
   updateDeal,
-  
+  getOwnerByEmail,
 };

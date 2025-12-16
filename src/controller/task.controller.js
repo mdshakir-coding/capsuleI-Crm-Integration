@@ -17,7 +17,9 @@ import { createCompany } from "../service/hubspot.service.js";
 import { associateDealToCompany } from "../service/hubspot.service.js";
 import { associateContactToTask } from "../service/hubspot.service.js";
 import { associateTaskToCompany } from "../service/hubspot.service.js";
-import { fetchCapsuleUserById } from "../service/service.js";
+import { fetchCsvData } from "../utils/invoice.Helper.js";
+import { mapNameToEmail } from "../utils/emailMapper.js";
+import { getOwnerByEmail } from "../service/hubspot.service.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
@@ -203,12 +205,7 @@ async function syncTasks() {
 
 async function syncTasks() {
   try {
-    
-
-
-
-
-    const tasks = await fetchTasks(); // Fetch from Capsule 
+    const tasks = await fetchTasks(); // Fetch from Capsule
     console.log("Task Entries Fetched:", tasks?.length);
 
     if (!tasks || tasks.length === 0) {
@@ -230,16 +227,22 @@ async function syncTasks() {
     // ✅ FIXED → loop through validTasks
     for (let i = startIndex; i < validTasks.length; i++) {
       const task = validTasks[i];
+      
+      // todo task id search loop 
+      //   if(task.id === 138278505) {
+      //   console.log("Task ID:", task);
+      // }
 
-      if (!task.party?.id) {
-        console.error(`❌ Skipping invalid task at index ${i}:`, task);
-        continue;
-      }
+      // if (task.id !== 138278505) {
+      //   // console.error(`❌ Skipping invalid task at index ${task.id}:`);
+      //   // saveProgress(i + 1);
+      //   continue;
+      // }
+
 
       console.log(`\n🔄 Syncing Task ${i + 1}/${validTasks.length}`);
       console.log("Capsule Task ID:", task.id);
 
-    
       try {
         // console.log("Proceesing task:",task); //todo remove this after testing
         // return;
@@ -247,13 +250,43 @@ async function syncTasks() {
         let companyId = null;
         let contactId = null;
         let tasksId = null;
+        let ownerId = null;
+
+        // ceate owner name by email
+        const ownerNameStr = task.owner?.name;
+        const ownerEmail = mapNameToEmail(ownerNameStr);
+        console.log("Owner Email:", ownerEmail);
+        // search based on email from hubsopt , use owner id in hubspot create task
+
+        const owner = await getOwnerByEmail(ownerEmail);
+        console.log("Owner Fetched:", owner.id);
+        ownerId = owner.id;
+
+        if (!owner) {
+          console.error(
+            `❌ Skipping invalid task at index ${i}:`,
+            ownerEmail,
+            
+          );
+          
+          const ownerId = owner.id;
+          console.log("Owner Fetched:", ownerId);
+          continue;
+        }
+        // return; //todo remove after testing
 
         // Create HubSpot Task
-        const result = await createHubSpotTask(task);
+        const result = await createHubSpotTask(task, ownerId);
         console.log("✅ HubSpot Task Created:", result.id);
 
         // Save HubSpot task ID
         tasksId = result.id;
+
+        if (!task.party?.id) {
+          console.error(`❌ Skipping invalid task at index ${i}:`, task);
+          continue;
+        }
+      
 
         // Fetch the Capsule Party
         const party = await fetchCapsuleParty(task.party?.id);
@@ -271,13 +304,13 @@ async function syncTasks() {
         }
 
         // Associate task → company
-        // if (tasksId && companyId) {
-        //   const taskCompanyResult = await associateTaskToCompany(
-        //     tasksId,
-        //     companyId
-        //   );
-        //   console.log("Task → Company Associated:", taskCompanyResult);
-        // }
+        if (tasksId && companyId) {
+          const taskCompanyResult = await associateTaskToCompany(
+            tasksId,
+            companyId
+          );
+          console.log("Task → Company Associated:", taskCompanyResult);
+        }
 
         // Loop through all party contacts
         for (const contact of party.emailAddresses) {
@@ -295,22 +328,22 @@ async function syncTasks() {
             }
 
             // Associate contact → task
-            // if (contactId && tasksId) {
-            //   const contactResult = await associateContactToTask(
-            //     contactId,
-            //     tasksId
-            //   );
-            //   console.log("Contact → Task Associated:", contactResult);
-            // }
+            if (contactId && tasksId) {
+              const contactResult = await associateContactToTask(
+                contactId,
+                tasksId
+              );
+              console.log("Contact → Task Associated:", contactResult);
+            }
 
             // Associate contact → company
-            // if (contactId && companyId) {
-            //   const companyResult = await associateContactCompany(
-            //     contactId,
-            //     companyId
-            //   );
-            //   console.log("Contact ↔ Company Associated:", companyResult);
-            // }
+            if (contactId && companyId) {
+              const companyResult = await associateContactCompany(
+                contactId,
+                companyId
+              );
+              console.log("Contact ↔ Company Associated:", companyResult);
+            }
           } catch (err) {
             console.error(
               "❌ Error creating HubSpot contact:",
@@ -320,7 +353,7 @@ async function syncTasks() {
         }
 
         // Save progress
-        // saveProgress(i + 1);
+        saveProgress(i + 1);
 
         // Throw only for testing
         // throw new Error("Testing error stop");
@@ -330,7 +363,7 @@ async function syncTasks() {
           err.response?.data || err.message
         );
 
-        // saveProgress(i);
+        saveProgress(i);
         // break; //todo remove
       }
     }

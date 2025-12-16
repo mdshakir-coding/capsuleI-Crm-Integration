@@ -255,7 +255,7 @@ async function fetchTasks() {
 
       // Add to master array
       allTasks.push(...tasks);
-      return allTasks; // todo remove after testing
+      // return allTasks; // todo remove after testing
 
       // If less than perPage, it's the last page
       if (tasks.length < perPage) {
@@ -300,29 +300,7 @@ async function fetchCapsuleParty(partyId) {
 }
 
 
-// fetch capsule by user id 
 
-async function fetchCapsuleUserById(userId) {
-  try {
-    const response = await axios.get(
-      `https://api.capsulecrm.com/api/v2/users/${userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.CAPSULE_API_TOKEN}`,
-          Accept: "application/json",
-        },
-      }
-    );
-
-    return response.data.user; // Capsule returns { user: {...} }
-  } catch (error) {
-    console.error(
-      "❌ Error fetching Capsule user:",
-      error.response?.data || error.message
-    );
-    return null;
-  }
-}
 
 
 
@@ -335,5 +313,4 @@ export {
   createDeal,
   fetchTasks,
   fetchCapsuleParty,
-  fetchCapsuleUserById
 };
