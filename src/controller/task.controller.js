@@ -230,15 +230,15 @@ async function syncTasks() {
       const task = validTasks[i];
 
       // todo task id search loop
-      // if (task.id === 140596612) {
-      //   console.log("Task ID:", task);
-      // }
+      if (task.id === 140596612) {
+        console.log("Task ID:", task);
+      }
 
-      // if (task.id !== 140596612) {
-      //   // console.error(`❌ Skipping invalid task at index ${task.id}:`);
-      //   // saveProgress(i + 1);
-      //   continue;
-      // }
+      if (task.id !== 140596612) {
+        // console.error(`❌ Skipping invalid task at index ${task.id}:`);
+        // saveProgress(i + 1);
+        continue;
+      }
 
       console.log(`\n🔄 Syncing Task ${i + 1}/${validTasks.length}`);
       console.log("Capsule Task ID:", task.id);
@@ -259,19 +259,6 @@ async function syncTasks() {
         dealId = existingDeal?.id || null;
 
         // return;
-
-        // Associate taskId to dealId 
-
-        if (tasksId && dealId) {
-          console.log("Task ID:", tasksId);
-          console.log("Deal ID:", dealId);
-          const dealTaskResult = await associateDealWithTask(tasksId, dealId);
-          // tasksId = dealTaskResult.id;
-
-          console.log("Deal → Task Associated:", dealTaskResult);
-        }
-
-        // return; //todo remove after testing 
 
         // ceate owner name by email
         const ownerNameStr = task.owner?.name;
@@ -299,6 +286,19 @@ async function syncTasks() {
         // Save HubSpot task ID
         tasksId = result.id;
 
+        // Associate taskId to dealId
+
+        if (tasksId && dealId) {
+          console.log("Task ID:", tasksId);
+          console.log("Deal ID:", dealId);
+          const dealTaskResult = await associateDealWithTask(tasksId, dealId);
+          // tasksId = dealTaskResult.id;
+
+          console.log("Deal → Task Associated:", dealTaskResult);
+        }
+
+        return; //todo remove after testing
+
         if (!task.party?.id) {
           console.error(`❌ Skipping invalid task at index ${i}:`, task);
           continue;
@@ -318,7 +318,6 @@ async function syncTasks() {
           console.log("HubSpot Company Created:", company.id);
           companyId = company.id;
         }
-        
 
         // Associate task → company
         if (tasksId && companyId) {

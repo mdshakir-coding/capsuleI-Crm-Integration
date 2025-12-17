@@ -52,7 +52,19 @@ function loadProgress() {
 async function syncActivity() {
 
 
+try {
 
+
+
+
+
+
+  
+  
+} catch (error) {
+  console.log("Error Handling ", error)
+  
+}
   
 
 
