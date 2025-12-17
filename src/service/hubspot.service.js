@@ -100,6 +100,7 @@ async function associateContactCompany(contactId, companyId) {
 //new code
 
 async function associateContactDeal(contactId, dealId) {
+if (!contactId || !dealId) return {};
   try {
     const baseUrl = process.env.HUBSPOT_BASE_URL || "https://api.hubapi.com";
 
@@ -135,7 +136,10 @@ async function associateContactDeal(contactId, dealId) {
 // Search Deal by Source ID
 
 async function searchDealBySourceId(sourceId) {
+  if (!sourceId) return {};
+
   try {
+
     const url = "https://api.hubapi.com/crm/v3/objects/deals/search";
 
     const payload = {
@@ -175,7 +179,7 @@ async function searchDealBySourceId(sourceId) {
       "Error searching deal by sourceid:",
       error.response?.data || error.message
     );
-    return null;
+    return {};
   }
 }
 
@@ -383,7 +387,7 @@ async function createEmailEngagement(contactId, emailData) {
 
 // create hubspot to task used clear props()
 
-async function createHubSpotTask(taskData,ownerId) {
+async function createHubSpotTask(taskData, ownerId) {
   const url = "https://api.hubapi.com/crm/v3/objects/tasks";
 
   const headers = {
@@ -411,6 +415,10 @@ async function createHubSpotTask(taskData,ownerId) {
     hs_timestamp: taskData.dueOn,
     // hs_due_date: taskData.dueOn,
     hubspot_owner_id: ownerId,
+    //hs_task_notes: taskData.owner?.name,
+    // hs_body_preview: taskData.owner?.name,
+    // hs_engagement_source: taskData.owner?.name,
+    // hs_task_type: taskData.owner?.name,
   };
 
   // Clean undefined/null before sending
@@ -699,7 +707,6 @@ async function updateDeal(dealId, opportunity) {
 //     //   (o) => o.email && o.email.toLowerCase() === email.toLowerCase()
 //     // );
 
-
 //     return response.data.results[0]|| {};
 //   } catch (error) {
 //     console.error(
@@ -710,7 +717,7 @@ async function updateDeal(dealId, opportunity) {
 //   }
 // }
 
-// new code 
+// new code
 
 async function getOwnerByEmail(email) {
   if (!email) return null;
@@ -718,22 +725,18 @@ async function getOwnerByEmail(email) {
   // console.log("Token:", process.env.HUBSPOT_API_KEY); // must NOT be undefined
 
   try {
-    const response = await axios.get(
-      "https://api.hubapi.com/crm/v3/owners",
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
-          Accept: "application/json",
-        },
-        params: {
-          email, // v3 supports email filter
-        },
-      }
-    );
+    const response = await axios.get("https://api.hubapi.com/crm/v3/owners", {
+      headers: {
+        Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+        Accept: "application/json",
+      },
+      params: {
+        email, // v3 supports email filter
+      },
+    });
 
     // v3 response structure
     return response.data.results?.[0] || null;
-
   } catch (error) {
     console.error(
       "❌ Error fetching owner:",
@@ -743,9 +746,35 @@ async function getOwnerByEmail(email) {
   }
 }
 
+// Associate deal id Task id 
 
+async function associateDealWithTask(taskId, dealId) {
+  if (!taskId || !dealId) return null;
 
+  try {
+    const url = `https://api.hubapi.com/crm/v4/objects/tasks/${taskId}/associations/deals/${dealId}/task_to_deal`;
 
+    const response = await axios.put(
+      url,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log(`✅ Deal ${dealId} associated with Task ${taskId}`);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "❌ Error associating Deal with Task:",
+      error?.response?.data || error.message
+    );
+    return {};
+  }
+}
 
 
 
@@ -764,4 +793,5 @@ export {
   associateTaskToCompany,
   updateDeal,
   getOwnerByEmail,
+  associateDealWithTask,
 };

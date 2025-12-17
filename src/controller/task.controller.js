@@ -20,6 +20,7 @@ import { associateTaskToCompany } from "../service/hubspot.service.js";
 import { fetchCsvData } from "../utils/invoice.Helper.js";
 import { mapNameToEmail } from "../utils/emailMapper.js";
 import { getOwnerByEmail } from "../service/hubspot.service.js";
+import { associateDealWithTask } from "../service/hubspot.service.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
@@ -227,18 +228,17 @@ async function syncTasks() {
     // ✅ FIXED → loop through validTasks
     for (let i = startIndex; i < validTasks.length; i++) {
       const task = validTasks[i];
-      
-      // todo task id search loop 
-      //   if(task.id === 138278505) {
+
+      // todo task id search loop
+      // if (task.id === 140596612) {
       //   console.log("Task ID:", task);
       // }
 
-      // if (task.id !== 138278505) {
+      // if (task.id !== 140596612) {
       //   // console.error(`❌ Skipping invalid task at index ${task.id}:`);
       //   // saveProgress(i + 1);
       //   continue;
       // }
-
 
       console.log(`\n🔄 Syncing Task ${i + 1}/${validTasks.length}`);
       console.log("Capsule Task ID:", task.id);
@@ -251,6 +251,27 @@ async function syncTasks() {
         let contactId = null;
         let tasksId = null;
         let ownerId = null;
+        let dealId = null;
+
+        // search existing deal by source id
+        const existingDeal = await searchDealBySourceId(task.opportunity?.id);
+        console.log("Existing Deal:", existingDeal);
+        dealId = existingDeal?.id || null;
+
+        // return;
+
+        // Associate taskId to dealId 
+
+        if (tasksId && dealId) {
+          console.log("Task ID:", tasksId);
+          console.log("Deal ID:", dealId);
+          const dealTaskResult = await associateDealWithTask(tasksId, dealId);
+          // tasksId = dealTaskResult.id;
+
+          console.log("Deal → Task Associated:", dealTaskResult);
+        }
+
+        // return; //todo remove after testing 
 
         // ceate owner name by email
         const ownerNameStr = task.owner?.name;
@@ -263,12 +284,8 @@ async function syncTasks() {
         ownerId = owner.id;
 
         if (!owner) {
-          console.error(
-            `❌ Skipping invalid task at index ${i}:`,
-            ownerEmail,
-            
-          );
-          
+          console.error(`❌ Skipping invalid task at index ${i}:`, ownerEmail);
+
           const ownerId = owner.id;
           console.log("Owner Fetched:", ownerId);
           continue;
@@ -286,7 +303,6 @@ async function syncTasks() {
           console.error(`❌ Skipping invalid task at index ${i}:`, task);
           continue;
         }
-      
 
         // Fetch the Capsule Party
         const party = await fetchCapsuleParty(task.party?.id);
@@ -302,6 +318,7 @@ async function syncTasks() {
           console.log("HubSpot Company Created:", company.id);
           companyId = company.id;
         }
+        
 
         // Associate task → company
         if (tasksId && companyId) {
@@ -353,7 +370,7 @@ async function syncTasks() {
         }
 
         // Save progress
-        saveProgress(i + 1);
+        // saveProgress(i + 1);
 
         // Throw only for testing
         // throw new Error("Testing error stop");
@@ -363,7 +380,7 @@ async function syncTasks() {
           err.response?.data || err.message
         );
 
-        saveProgress(i);
+        // saveProgress(i);
         // break; //todo remove
       }
     }

@@ -249,13 +249,13 @@ async function fetchTasks() {
         }
       );
 
-      const tasks = response.data.tasks || [];
+      const tasks = response.data.tasks || []; 
 
       console.log(`Fetched Page ${page} → ${tasks.length} tasks`);
 
       // Add to master array
       allTasks.push(...tasks);
-      // return allTasks; // todo remove after testing
+      return allTasks; // todo remove after testing
 
       // If less than perPage, it's the last page
       if (tasks.length < perPage) {
