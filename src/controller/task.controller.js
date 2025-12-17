@@ -279,12 +279,22 @@ async function syncTasks() {
         }
         // return; //todo remove after testing
 
+        // ownerName Add
+
+        const ownerName = task.owner?.name;
+        const ownerN = mapNameToEmail(ownerName);
+        console.log("Owner Email:", ownerN);
+        
+        // console.log("👤 Task Owner Name:", ownerName);
+
         // Create HubSpot Task
-        const result = await createHubSpotTask(task, ownerId);
+        const result = await createHubSpotTask(task,ownerId,ownerName);
         console.log("✅ HubSpot Task Created:", result.id);
 
         // Save HubSpot task ID
         tasksId = result.id;
+
+        // return;
 
         // Associate taskId to dealId
 
@@ -369,7 +379,7 @@ async function syncTasks() {
         }
 
         // Save progress
-        // saveProgress(i + 1);
+        saveProgress(i + 1);
 
         // Throw only for testing
         // throw new Error("Testing error stop");
