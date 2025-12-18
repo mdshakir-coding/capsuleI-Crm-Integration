@@ -100,7 +100,7 @@ async function syncEmails() {
             if (!contactId) continue;
 
             const cEmail = await createEmailEngagement(contactId, emailData);
-            console.log("✔ Email engagement created:", cEmail.id);
+            console.log("✔ Email engagement created:", cEmail);
           } catch (error) {
             console.error(
               "❌ Error processing participant:",

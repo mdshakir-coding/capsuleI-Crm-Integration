@@ -339,7 +339,7 @@ async function createEmailEngagement(contactId, emailData) {
       "Error creating email engagement:",
       error.response?.data || error.message
     );
-    throw error;
+    return {};
   }
 }
 
@@ -401,9 +401,8 @@ async function createHubSpotTask(taskData, ownerId, ownerName) {
     completed: "COMPLETED",
   };
 
-  const normalizedStatus = String(taskData.status || "")
-    .trim()
-    .toLowerCase();
+
+  const normalizedStatus = String(taskData.status || "").trim().toLowerCase();
 
   const properties = {
     hs_task_subject: taskData.description,
@@ -416,8 +415,6 @@ async function createHubSpotTask(taskData, ownerId, ownerName) {
     hubspot_owner_id: ownerId,
     //hs_task_notes: taskData.owner?.name,
     // hs_body_preview: taskData.owner?.name,
-    // hs_engagement_source: taskData.owner?.name,
-    // hs_task_type: taskData.owner?.name,
   };
 
   // Clean undefined/null before sending

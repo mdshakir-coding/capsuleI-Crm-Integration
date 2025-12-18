@@ -294,7 +294,7 @@ async function syncTasks() {
         // Save HubSpot task ID
         tasksId = result.id;
 
-        // return;
+        return; //todo remove
 
         // Associate taskId to dealId
 
@@ -389,7 +389,7 @@ async function syncTasks() {
           err.response?.data || err.message
         );
 
-        // saveProgress(i);
+        saveProgress(i);
         // break; //todo remove
       }
     }

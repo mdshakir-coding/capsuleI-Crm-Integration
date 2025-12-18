@@ -12,9 +12,9 @@ import {syncActivity} from "./controller/activity.controller.js";
 console.log("Loaded API Token:", process.env.HUBSPOT_API_KEY);
 const PORT = process.env.PORT || 3000;
 // syncToHubspotasync(); 
-syncTasks();
+// syncTasks();
 // syncOpportunities();
-// syncEmails();
+syncEmails();
 // syncActivity();
 
 app.listen(PORT, () => {
