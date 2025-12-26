@@ -83,8 +83,8 @@ let startIndex = loadProgress();
         // return; // todo remove after testing
         // create  Notes in hubspot
         const create = await createHubSpotNote(payload);
-        console.log("✅ Affiliate created", NotesId);
         NotesId = create?.id || null;
+        console.log("✅ Notes created", NotesId);
     
 
         // Save progress after successful processing
