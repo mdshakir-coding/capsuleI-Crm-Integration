@@ -22,6 +22,7 @@ import { mapNameToEmail } from "../utils/emailMapper.js";
 import { getOwnerByEmail } from "../service/hubspot.service.js";
 import { associateDealWithTask } from "../service/hubspot.service.js";
 
+
 import { fileURLToPath } from "url";
 import path from "path";
 import fs from "fs";
@@ -206,7 +207,7 @@ async function syncTasks() {
 
 async function syncTasks() {
   try {
-    const tasks = await fetchTasks(); // Fetch from Capsule
+    const tasks = await fetchTasks(); // Fetch Task from Capsule
     console.log("Task Entries Fetched:", tasks?.length);
 
     if (!tasks || tasks.length === 0) {
@@ -218,6 +219,7 @@ async function syncTasks() {
     const validTasks = tasks.filter((t) => t && typeof t === "object");
 
     console.log(`Valid Tasks after cleaning: ${validTasks.length}`);
+    
 
     // Load progress
     let startIndex = loadProgress();
@@ -230,23 +232,21 @@ async function syncTasks() {
       const task = validTasks[i];
 
       // todo task id search loop
-      if (task.id === 140596612) {
-        console.log("Task ID:", task);
-      }
+      // if (task.id === 153310321) {
+      //   console.log("Task ID:", task);
+      // }
 
-      if (task.id !== 140596612) {
-        // console.error(`❌ Skipping invalid task at index ${task.id}:`);
-        // saveProgress(i + 1);
-        continue;
-      }
+      // if (task.id !== 153310321) {
+      //   // console.error(`❌ Skipping invalid task at index ${task.id}:`);
+      //   // saveProgress(i + 1);
+      //   continue;
+      // }
 
       console.log(`\n🔄 Syncing Task ${i + 1}/${validTasks.length}`);
       console.log("Capsule Task ID:", task.id);
 
       try {
-        // console.log("Proceesing task:",task); //todo remove this after testing
-        // return;
-
+      
         let companyId = null;
         let contactId = null;
         let tasksId = null;
@@ -257,8 +257,6 @@ async function syncTasks() {
         const existingDeal = await searchDealBySourceId(task.opportunity?.id);
         console.log("Existing Deal:", existingDeal);
         dealId = existingDeal?.id || null;
-
-        // return;
 
         // ceate owner name by email
         const ownerNameStr = task.owner?.name;
@@ -277,7 +275,6 @@ async function syncTasks() {
           console.log("Owner Fetched:", ownerId);
           continue;
         }
-        // return; //todo remove after testing
 
         // ownerName Add
 
@@ -294,7 +291,6 @@ async function syncTasks() {
         // Save HubSpot task ID
         tasksId = result.id;
 
-        return; //todo remove
 
         // Associate taskId to dealId
 
@@ -307,7 +303,6 @@ async function syncTasks() {
           console.log("Deal → Task Associated:", dealTaskResult);
         }
 
-        return; //todo remove after testing
 
         if (!task.party?.id) {
           console.error(`❌ Skipping invalid task at index ${i}:`, task);
@@ -380,9 +375,6 @@ async function syncTasks() {
 
         // Save progress
         saveProgress(i + 1);
-
-        // Throw only for testing
-        // throw new Error("Testing error stop");
       } catch (err) {
         console.error(
           "❌ Error creating HubSpot task:",
@@ -390,14 +382,11 @@ async function syncTasks() {
         );
 
         saveProgress(i);
-        // break; //todo remove
       }
     }
 
     console.log("🎉 All tasks synced successfully!");
 
-    // Throw only for testing
-    // throw new Error("Testing error stopping");
   } catch (error) {
     console.error("❌ syncTasks() failed:", error.message);
     return;

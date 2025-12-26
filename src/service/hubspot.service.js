@@ -226,6 +226,7 @@ async function searchContactByEmail(email) {
 // Create Contact in HubSpot
 
 async function createContactInHubSpot(email) {
+  if (!email) return {};
   try {
     const payload = {
       properties: {
@@ -253,77 +254,53 @@ async function createContactInHubSpot(email) {
   }
 }
 
-// Example usage of createEmailEngagement
+// create email engagement
 
-// async function createEmailEngagement(contactId, emailData) {
-//   try {
-//     const payload = {
-//       properties: {
-//         hs_timestamp: Date.now(),
-//         hs_email_subject: emailData.subject || "",
-//         hs_email_text: emailData.body || "",
-//         hs_email_direction: "INCOMING_EMAIL",  // FIXED
-//       },
-//       associations: [
-//         {
-//           to: { id: contactId },
-//           types: [
-//             {
-//               associationCategory: "HUBSPOT_DEFINED",
-//               associationTypeId: 9, // Correct association for Contact ↔ Email
-//             },
-//           ],
-//         },
-//       ],
-//     };
+async function createEmailEngagement(contactId, emailData, fromData, toData) {
+  if (!contactId || !emailData || !fromData || !toData) return {};
 
-//     const response = await axios.post(
-//       "https://api.hubapi.com/crm/v3/objects/emails",
-//       payload,
-//       {
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
-//         },
-//       }
-//     );
+  const nameParts = fromData.name.trim().split(" ");
 
-//     return response.data;
+  const firstName = nameParts[0] || "";
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
 
-//   } catch (error) {
-//     console.error(
-//       "Error creating email engagement:",
-//       error.response?.data || error.message
-//     );
-//     throw error;
-//   }
-// }
-
-async function createEmailEngagement(contactId, emailData) {
   try {
     const payload = {
-      properties: cleanProps({
-        hs_timestamp: Date.now(),
-        hs_email_subject: emailData.subject || "",
-        hs_email_text: emailData.body || "",
-        hs_email_direction: emailData.direction,
-      }),
+      engagement: {
+        type: "EMAIL",
+        timestamp: emailData.timestamp || Date.now(),
+      },
 
-      associations: [
-        {
-          to: { id: contactId },
-          types: [
-            {
-              associationCategory: "HUBSPOT_DEFINED",
-              associationTypeId: 198,
-            },
-          ],
+      associations: {
+        contactIds: [contactId],
+      },
+
+      metadata: {
+        from: {
+          // id: fromData.id,
+          email: fromData.address,
+          firstName: firstName,
+          lastName: lastName,
         },
-      ],
+
+        to: [
+          {
+            email: toData.address,
+          }
+        ],
+
+        subject: emailData.subject || "",
+        text: emailData.body || "",
+      },
     };
 
+    
+
+    // console.log(`to data ${JSON.stringify(toData.address)}`);
+  
+
     const response = await axios.post(
-      "https://api.hubapi.com/crm/v3/objects/emails",
+      "https://api.hubapi.com/engagements/v1/engagements",
       payload,
       {
         headers: {
@@ -332,11 +309,12 @@ async function createEmailEngagement(contactId, emailData) {
         },
       }
     );
+    // console.log("Email engagement created:", JSON.stringify(response.data.metadata.to));
 
     return response.data;
   } catch (error) {
     console.error(
-      "Error creating email engagement:",
+      "❌ Error creating EMAIL engagement (v1):",
       error.response?.data || error.message
     );
     return {};
@@ -384,7 +362,6 @@ async function createEmailEngagement(contactId, emailData) {
 //   }
 // }
 
-// create hubspot to task used clear props()
 async function createHubSpotTask(taskData, ownerId, ownerName) {
   const url = "https://api.hubapi.com/crm/v3/objects/tasks";
 
@@ -401,8 +378,9 @@ async function createHubSpotTask(taskData, ownerId, ownerName) {
     completed: "COMPLETED",
   };
 
-
-  const normalizedStatus = String(taskData.status || "").trim().toLowerCase();
+  const normalizedStatus = String(taskData.status || "")
+    .trim()
+    .toLowerCase();
 
   const properties = {
     hs_task_subject: taskData.description,
@@ -773,6 +751,68 @@ async function associateDealWithTask(taskId, dealId) {
   }
 }
 
+// 
+
+ async function createHubSpotNote(payload) {
+  if (!payload) return {};
+  try {
+    const response = await axios.post(
+      `${HUBSPOT_BASE_URL}/crm/v3/objects/notes`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "❌ Error creating HubSpot Note:",
+      error.response?.data || error.message
+    );
+    return {};
+  }
+}
+
+
+// Update Notes in hubspot
+
+async function updateHubSpotNote(noteId, payload) {
+  if (!noteId || !payload) return {};
+
+  try {
+    const response = await axios.patch(
+      `${HUBSPOT_BASE_URL}/crm/v3/objects/notes/${noteId}`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "❌ Error updating HubSpot Note:",
+      error.response?.data || error.message
+    );
+    return {};
+  }
+}
+
+
+// Search Notes Functon in Hubspot
+
+
+
+
+
 export {
   associateContactDeal,
   associateContactCompany,
@@ -789,4 +829,8 @@ export {
   updateDeal,
   getOwnerByEmail,
   associateDealWithTask,
+  createHubSpotNote,
+  updateHubSpotNote,
+
+  
 };

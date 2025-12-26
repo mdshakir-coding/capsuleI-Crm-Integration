@@ -47,10 +47,9 @@ function loadProgress() {
 }
 
 
-// Activity Sync
+// Meetings Sync
 
-
-async function syncActivity() {
+async function syncMeetings() {
 
 
 try {
@@ -85,4 +84,4 @@ try {
 }
 
 
-export {syncActivity};
+export {syncMeetings};

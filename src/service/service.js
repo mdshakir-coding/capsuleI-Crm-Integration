@@ -47,7 +47,7 @@ async function fetchCapsuleEmailEntries(perPage = 100) {
       console.log(`Fetched page ${page}, entries: ${emailEntries.length}`);
 
       allEmails.push(...emailEntries);
-      return allEmails; //todo remove after testing
+      // return allEmails; //todo remove after testing
 
       // Capsule returns empty array when no more records
       if (emailEntries.length < perPage) {
@@ -255,7 +255,7 @@ async function fetchTasks() {
 
       // Add to master array
       allTasks.push(...tasks);
-      return allTasks; // todo remove after testing
+      // return allTasks; // todo remove after testing
 
       // If less than perPage, it's the last page
       if (tasks.length < perPage) {
@@ -300,6 +300,59 @@ async function fetchCapsuleParty(partyId) {
 }
 
 
+// Fetch Notes from Capsule
+
+async function fetchNotes() {
+  let page = 1;
+  const perPage = 100;
+
+  let allNotes = [];
+  let hasMore = true;
+
+  try {
+    while (hasMore) {
+      const response = await axios.get(
+        "https://api.capsulecrm.com/api/v2/entries",
+        {
+          params: {
+            type: "note",
+            page,
+            perPage
+          },
+          headers: {
+            Authorization: `Bearer ${process.env.CAPSULE_API_TOKEN}`,
+            Accept: "application/json"
+          }
+        }
+      );
+
+      const notes = response.data.entries || [];
+
+      console.log(`Fetched Page ${page} → ${notes.length} notes`);
+
+      // Collect notes
+      allNotes.push(...notes);
+      return allNotes; // todo remove after testing
+
+      // Stop pagination when last page
+      if (notes.length < perPage) {
+        hasMore = false;
+      } else {
+        page++;
+      }
+    }
+
+    return allNotes;
+  } catch (error) {
+    console.error(
+      "❌ Error fetching Capsule Notes:",
+      error.response?.data || error.message
+    );
+    return [];
+  }
+}
+
+
 
 
 
@@ -313,4 +366,7 @@ export {
   createDeal,
   fetchTasks,
   fetchCapsuleParty,
+  fetchNotes,
+  
+  
 };

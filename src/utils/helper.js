@@ -49,4 +49,39 @@ function cleanProps(obj) {
   return cleaned;
 }
 
-export { cleanProps };
+// Create Notes Payload in Hubspot
+
+
+function buildHubSpotNotePayload(data = {}) {
+  function toISOString(dateStr) {
+    return dateStr ? new Date(dateStr).toISOString() : null;
+  }
+
+  console.log("Raw note input data:", data);
+
+  const properties = {
+    hs_note_body: data.note_body || data.body || data.content || "",
+    hs_timestamp: toISOString(data.created_at || data.timestamp),
+  };
+
+  return {
+    properties: cleanProps(properties),
+  };
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export { cleanProps,buildHubSpotNotePayload};
