@@ -236,7 +236,7 @@ async function syncTasks() {
       //   console.log("Task ID:", task);
       // }
 
-      if (task.id !== 153310321) {
+      if (task.id !== 155426529) {
         // console.error(`❌ Skipping invalid task at index ${task.id}:`);
         // saveProgress(i + 1);
         continue;
@@ -317,13 +317,17 @@ async function syncTasks() {
         const party = await fetchCapsuleParty(task.party?.id);
         console.log("Capsule Party Fetched:", party.id);
 
+        // console.log("Party Organisation Name:", party?.organisation?.name);
+        // return;
+
         // Search or create company
-        let company = await searchCompanyByName(party?.organisation?.name);
+        let company = await searchCompanyByName(party?.name);
+
         console.log("HubSpot Company Fetched:", company.id);
         companyId = company.id;
 
         if (!company) {
-          const company = await createCompany(party?.organisation?.name);
+          const company = await createCompany(party?.name);
           console.log("HubSpot Company Created:", company.id);
           companyId = company.id;
         }
