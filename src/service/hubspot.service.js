@@ -378,31 +378,18 @@ async function createHubSpotTask(taskData, ownerId, ownerName) {
   const normalizedStatus = String(taskData.status || "")
     .trim()
     .toLowerCase();
-
-  const properties = {
-    // hs_task_subject: taskData.description,
-   hs_task_subject: `Category: ${taskData.category?.name ?? "" } Description: ${taskData.description }`,
-    // hs_task_body: taskData.detail,
-    hs_task_body: `${taskData.detail}\n\nOwnerName: ${ownerName}`,
     
 
-
-
-// hs_task_body: `
-// Category: ${taskData.category?.name || ""}
-// Task Status: ${statusMap[normalizedStatus] || ""}
-// Description:
-// ${taskData.detail || ""}
-// OwnerName: ${ownerName}
-// `.trim(),
+  const properties = {
+  hs_task_subject: `Description:${taskData.description ?? ""}`,
+  hs_task_body: `Category: ${taskData.category?.name ?? ""}
+Task Status: ${taskData?.status ?? ""}
+Owner Name: ${taskData.owner?.name ?? ""}`,
 
     hs_task_status: statusMap[normalizedStatus],
-    // capsule_status: statusMap[normalizedStatus],
     hs_timestamp: taskData.dueOn,
-    // hs_due_date: taskData.dueOn,
     hubspot_owner_id: ownerId,
-    //hs_task_notes: taskData.owner?.name,
-    // hs_body_preview: taskData.owner?.name,
+
   };
 
   // Clean undefined/null before sending
@@ -417,7 +404,6 @@ async function createHubSpotTask(taskData, ownerId, ownerName) {
     console.log("Task created successfully:", response.data);
     return response.data;
   } catch (error) {
-    3;
     console.error(
       "Error creating HubSpot task:",
       error.response?.data || error

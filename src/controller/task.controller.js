@@ -317,7 +317,7 @@ async function syncTasks() {
         const party = await fetchCapsuleParty(task.party?.id);
         console.log("Capsule Party Fetched:", party.id);
 
-        // console.log("Party Organisation Name:", party?.organisation?.name);
+        // console.log("Party Organisation Name:", party?.name);
         // return;
 
         // Search or create company
@@ -331,7 +331,8 @@ async function syncTasks() {
           console.log("HubSpot Company Created:", company.id);
           companyId = company.id;
         }
-
+        
+        
         // Associate task → company
         if (tasksId && companyId) {
           const taskCompanyResult = await associateTaskToCompany(
