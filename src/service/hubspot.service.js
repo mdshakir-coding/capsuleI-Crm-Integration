@@ -286,7 +286,7 @@ async function createEmailEngagement(contactId, emailData, fromData, toData) {
         to: [
           {
             email: toData.address,
-          }
+          },
         ],
 
         subject: emailData.subject || "",
@@ -294,10 +294,7 @@ async function createEmailEngagement(contactId, emailData, fromData, toData) {
       },
     };
 
-    
-
     // console.log(`to data ${JSON.stringify(toData.address)}`);
-  
 
     const response = await axios.post(
       "https://api.hubapi.com/engagements/v1/engagements",
@@ -383,9 +380,22 @@ async function createHubSpotTask(taskData, ownerId, ownerName) {
     .toLowerCase();
 
   const properties = {
-    hs_task_subject: taskData.description,
+    // hs_task_subject: taskData.description,
+   hs_task_subject: `Category: ${taskData.category?.name ?? "" } Description: ${taskData.description }`,
     // hs_task_body: taskData.detail,
     hs_task_body: `${taskData.detail}\n\nOwnerName: ${ownerName}`,
+    
+
+
+
+// hs_task_body: `
+// Category: ${taskData.category?.name || ""}
+// Task Status: ${statusMap[normalizedStatus] || ""}
+// Description:
+// ${taskData.detail || ""}
+// OwnerName: ${ownerName}
+// `.trim(),
+
     hs_task_status: statusMap[normalizedStatus],
     // capsule_status: statusMap[normalizedStatus],
     hs_timestamp: taskData.dueOn,
@@ -751,9 +761,9 @@ async function associateDealWithTask(taskId, dealId) {
   }
 }
 
-// 
+//
 
- async function createHubSpotNote(payload) {
+async function createHubSpotNote(payload) {
   if (!payload) return {};
   try {
     const response = await axios.post(
@@ -762,11 +772,10 @@ async function associateDealWithTask(taskId, dealId) {
       {
         headers: {
           Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
-
 
     return response.data;
   } catch (error) {
@@ -777,7 +786,6 @@ async function associateDealWithTask(taskId, dealId) {
     return {};
   }
 }
-
 
 // Update Notes in hubspot
 
@@ -806,12 +814,7 @@ async function updateHubSpotNote(noteId, payload) {
   }
 }
 
-
 // Search Notes Functon in Hubspot
-
-
-
-
 
 export {
   associateContactDeal,
@@ -831,6 +834,4 @@ export {
   associateDealWithTask,
   createHubSpotNote,
   updateHubSpotNote,
-
-  
 };

@@ -236,11 +236,15 @@ async function syncTasks() {
       //   console.log("Task ID:", task);
       // }
 
-      // if (task.id !== 153310321) {
-      //   // console.error(`❌ Skipping invalid task at index ${task.id}:`);
-      //   // saveProgress(i + 1);
-      //   continue;
-      // }
+      if (task.id !== 153310321) {
+        // console.error(`❌ Skipping invalid task at index ${task.id}:`);
+        // saveProgress(i + 1);
+        continue;
+      }
+
+      console.log("Proceesing task:",task); //todo remove this after testing
+      // return; // todo remove after testing
+
 
       console.log(`\n🔄 Syncing Task ${i + 1}/${validTasks.length}`);
       console.log("Capsule Task ID:", task.id);
@@ -347,7 +351,6 @@ async function syncTasks() {
             } else {
               console.log("HubSpot Contact Fetched:", hubspotContact.id);
             }
-
             // Associate contact → task
             if (contactId && tasksId) {
               const contactResult = await associateContactToTask(
@@ -368,11 +371,12 @@ async function syncTasks() {
           } catch (err) {
             console.error(
               "❌ Error creating HubSpot contact:",
-              err.response?.data || err.message
+              err.response?.data || err.message,
+              
             );
           }
         }
-
+        return; //todo remove after testing
         // Save progress
         saveProgress(i + 1);
       } catch (err) {

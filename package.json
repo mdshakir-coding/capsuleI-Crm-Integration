@@ -2,6 +2,14 @@
   "name": "capsuleintegration",
   "version": "1.0.0",
   "description": "",
+  "homepage": "https://github.com/mdshakir-coding/capsuleI-Crm-Integration#readme",
+  "bugs": {
+    "url": "https://github.com/mdshakir-coding/capsuleI-Crm-Integration/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mdshakir-coding/capsuleI-Crm-Integration.git"
+  },
   "license": "ISC",
   "author": "",
   "type": "module",

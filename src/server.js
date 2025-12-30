@@ -13,11 +13,11 @@ import { syncNotes } from "./controller/notes.controller.js";
 console.log("Loaded API Token:", process.env.HUBSPOT_API_KEY);
 const PORT = process.env.PORT || 3000;
 // syncToHubspotasync(); 
-// syncTasks();
+syncTasks();
 // syncOpportunities();
 // syncEmails();
 // syncActivity();
-syncNotes();
+// syncNotesß();
 
 
 app.listen(PORT, () => {
