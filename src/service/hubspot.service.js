@@ -384,7 +384,13 @@ async function createHubSpotTask(taskData, ownerId, ownerName) {
   hs_task_subject: `${taskData.description ?? ""}`,
   hs_task_body: `Category: ${taskData.category?.name ?? ""}
 Task Status: ${taskData?.status ?? ""}
-Owner Name: ${taskData.owner?.name ?? ""}`,
+Owner Name: ${taskData.owner?.name ?? ""}
+
+interval: ${taskData.repeat?.interval ?? ""}
+  frequency: ${taskData.repeat?.frequency ?? ""},
+  on: ${taskData.repeat?.on ?? ""}`,
+
+
 
     hs_task_status: statusMap[normalizedStatus],
     hs_timestamp: taskData.dueOn,

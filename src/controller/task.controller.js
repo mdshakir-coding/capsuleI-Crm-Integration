@@ -232,17 +232,14 @@ async function syncTasks() {
       const task = validTasks[i];
 
       // todo task id search loop
-      // if (task.id === 153310321) {
-      //   console.log("Task ID:", task);
+
+      // if (task.id !== 155426529) {
+      //   // console.error(`❌ Skipping invalid task at index ${task.id}:`);
+      //   // saveProgress(i + 1);
+      //   continue;
       // }
 
-      if (task.id !== 155426529) {
-        // console.error(`❌ Skipping invalid task at index ${task.id}:`);
-        // saveProgress(i + 1);
-        continue;
-      }
-
-      console.log("Proceesing task:",task); //todo remove this after testing
+      // console.log("Proceesing task:",task); //todo remove this after testing
       // return; // todo remove after testing
 
 
@@ -381,7 +378,7 @@ async function syncTasks() {
             );
           }
         }
-        return; //todo remove after testing
+        // return; //todo remove after testing
         // Save progress
         saveProgress(i + 1);
       } catch (err) {

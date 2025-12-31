@@ -18,12 +18,10 @@ import { fetchCapsuleParty } from "../service/service.js";
 import { searchCompanyByName } from "../service/hubspot.service.js";
 import { createCompany } from "../service/hubspot.service.js";
 import { associateDealToCompany } from "../service/hubspot.service.js";
-import {fetchNotes} from '../service/service.js'
-import{createHubSpotNote} from '../service/hubspot.service.js'
-import{updateHubSpotNote} from '../service/hubspot.service.js'
-import{buildHubSpotNotePayload} from '../utils/helper.js';
-
-
+import { fetchNotes } from "../service/service.js";
+import { createHubSpotNote } from "../service/hubspot.service.js";
+import { updateHubSpotNote } from "../service/hubspot.service.js";
+import { buildHubSpotNotePayload } from "../utils/helper.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
@@ -36,46 +34,50 @@ const __dirname = path.dirname(__filename);
 const progressFile = path.resolve(__dirname, "progress.json");
 
 function saveProgress(index) {
-fs.writeFileSync(progressFile, JSON.stringify({ index }), "utf-8");
+  fs.writeFileSync(progressFile, JSON.stringify({ index }), "utf-8");
 }
 
 function loadProgress() {
-if (fs.existsSync(progressFile)) {
+  if (fs.existsSync(progressFile)) {
     try {
-    const data = fs.readFileSync(progressFile, "utf-8");
-    const obj = JSON.parse(data);
-    return typeof obj.index === "number" ? obj.index : 0;
+      const data = fs.readFileSync(progressFile, "utf-8");
+      const obj = JSON.parse(data);
+      return typeof obj.index === "number" ? obj.index : 0;
     } catch {
-    return 0;
+      return 0;
     }
+  }
+  return 0;
 }
-return 0;
-}
-
 
 async function syncNotes() {
-
-
-try {
-
-
- const notes = await fetchNotes(); // Fetch Notes from Capsule
-    console.log("Task Entries Fetched:", notes?.length);
+  try {
+    const notes = await fetchNotes(); // Fetch Notes from Capsule
+    console.log("Notes Entries Fetched:", notes?.length);
 
     if (!notes || notes.length === 0) {
-    console.log("No notes found to sync.");
-    return;
+      console.log("No notes found to sync.");
+      return;
     }
+    // search Notes hubspot id 
 
-let startIndex = loadProgress();
+
+
+
+    let startIndex = loadProgress();
 
     for (let i = startIndex; i < notes.length; i++) {
       try {
         const note = notes[i];
+         // note id  testing logic
+        if (note?.id === 464424997 || note?.id === "464424997") {
+          console.log("Processing note:", note);
+        } // todo uncomment
 
         let NotesId = null;
 
-        const payload  = buildHubSpotNotePayload(notes); // call the function for payload 
+
+        const payload = buildHubSpotNotePayload(notes); // call the function for payload
 
         console.log(" Notes", notes);
         console.log("Payloads", payload);
@@ -86,8 +88,6 @@ let startIndex = loadProgress();
         NotesId = create?.id || null;
         console.log("✅ Notes created", NotesId);
         return; // todo remove after testing
-    
-    
 
         // Save progress after successful processing
         // saveProgress(i + 1);
@@ -104,7 +104,5 @@ let startIndex = loadProgress();
     return;
   }
 }
-
-
 
 export { syncNotes };
