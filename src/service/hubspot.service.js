@@ -381,7 +381,7 @@ async function createHubSpotTask(taskData, ownerId, ownerName) {
     
 
   const properties = {
-  hs_task_subject: `Description:${taskData.description ?? ""}`,
+  hs_task_subject: `${taskData.description ?? ""}`,
   hs_task_body: `Category: ${taskData.category?.name ?? ""}
 Task Status: ${taskData?.status ?? ""}
 Owner Name: ${taskData.owner?.name ?? ""}`,
@@ -753,7 +753,7 @@ async function createHubSpotNote(payload) {
   if (!payload) return {};
   try {
     const response = await axios.post(
-      `${HUBSPOT_BASE_URL}/crm/v3/objects/notes`,
+      `https://api.hubapi.com/crm/v3/objects/notes`,
       payload,
       {
         headers: {

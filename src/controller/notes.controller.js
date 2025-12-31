@@ -85,6 +85,8 @@ let startIndex = loadProgress();
         const create = await createHubSpotNote(payload);
         NotesId = create?.id || null;
         console.log("✅ Notes created", NotesId);
+        return; // todo remove after testing
+    
     
 
         // Save progress after successful processing

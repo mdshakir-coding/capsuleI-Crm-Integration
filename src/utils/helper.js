@@ -51,23 +51,24 @@ function cleanProps(obj) {
 
 // Create Notes Payload in Hubspot
 
-
 function buildHubSpotNotePayload(data = {}) {
-  function toISOString(dateStr) {
-    return dateStr ? new Date(dateStr).toISOString() : null;
+  function toEpochMs(dateStr) {
+    return dateStr ? new Date(dateStr).getTime() : Date.now();
   }
 
   console.log("Raw note input data:", data);
 
   const properties = {
-    hs_note_body: data.note_body || data.body || data.content || "",
-    hs_timestamp: toISOString(data.created_at || data.timestamp),
+    hs_note_body: data.hs_note_body || "Default note body",
+    hs_timestamp: toEpochMs(data.hs_timestamp || data.created_at || null), // required
+    
   };
 
   return {
     properties: cleanProps(properties),
   };
 }
+
 
 
 
