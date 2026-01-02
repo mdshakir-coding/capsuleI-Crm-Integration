@@ -388,7 +388,9 @@ Owner Name: ${taskData.owner?.name ?? ""}
 
 interval: ${taskData.repeat?.interval ?? ""}
   frequency: ${taskData.repeat?.frequency ?? ""},
-  on: ${taskData.repeat?.on ?? ""}`,
+  on: ${taskData.repeat?.on ?? ""}
+  Detail: ${taskData?.detail ?? ""}`,
+
 
 
 

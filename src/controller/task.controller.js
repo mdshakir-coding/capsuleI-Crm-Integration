@@ -233,7 +233,7 @@ async function syncTasks() {
 
       // todo task id search loop
 
-      // if (task.id !== 155426529) {
+      // if (task.id !== 138278624) {
       //   // console.error(`❌ Skipping invalid task at index ${task.id}:`);
       //   // saveProgress(i + 1);
       //   continue;
