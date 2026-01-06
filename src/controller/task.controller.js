@@ -233,7 +233,7 @@ async function syncTasks() {
 
       // todo task id search loop
 
-      // if (task.id !== 138278624) {
+      // if (task.id !== 138278624) { 
       //   // console.error(`❌ Skipping invalid task at index ${task.id}:`);
       //   // saveProgress(i + 1);
       //   continue;
@@ -318,13 +318,13 @@ async function syncTasks() {
         // return;
 
         // Search or create company
-        let company = await searchCompanyByName(party?.name);
+        let company = await searchCompanyByName(party?.name || `${party?.firstName} ${party?.lastName}`);
 
         console.log("HubSpot Company Fetched:", company.id);
         companyId = company.id;
 
         if (!company) {
-          const company = await createCompany(party?.name);
+          const company = await createCompany(party?.name || `${party?.firstName} ${party?.lastName}`);
           console.log("HubSpot Company Created:", company.id);
           companyId = company.id;
         }

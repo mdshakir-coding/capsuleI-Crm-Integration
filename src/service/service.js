@@ -352,6 +352,31 @@ async function fetchNotes() {
   }
 }
 
+// Party fetch based on party Id
+
+async function fetchPartyById(partyId) {
+
+  try {
+    const response = await axios.get(
+      `https://api.capsulecrm.com/api/v2/parties/${partyId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.CAPSULE_API_TOKEN}`,
+          Accept: "application/json"
+        }
+      }
+    );
+
+    return response.data.party;
+  } catch (error) {
+    console.error(
+      "❌ Error fetching party:",
+      error.response?.data || error.message
+    );
+    return null;
+  }
+}
+
 
 
 
@@ -367,6 +392,7 @@ export {
   fetchTasks,
   fetchCapsuleParty,
   fetchNotes,
+  fetchPartyById,
   
   
 };

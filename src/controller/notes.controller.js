@@ -22,6 +22,7 @@ import { fetchNotes } from "../service/service.js";
 import { createHubSpotNote } from "../service/hubspot.service.js";
 import { updateHubSpotNote } from "../service/hubspot.service.js";
 import { buildHubSpotNotePayload } from "../utils/helper.js";
+import { fetchPartyById } from "../service/service.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
@@ -54,35 +55,45 @@ async function syncNotes() {
   try {
     const notes = await fetchNotes(); // Fetch Notes from Capsule
     console.log("Notes Entries Fetched:", notes?.length);
-
-    if (!notes || notes.length === 0) {
-      console.log("No notes found to sync.");
-      return;
-    }
-    // search Notes hubspot id 
-
-
-
+    // if (!notes || notes.length === 0) {
+    //   console.log("No notes found to sync.");
+    //   return;
+    // }
 
     let startIndex = loadProgress();
 
     for (let i = startIndex; i < notes.length; i++) {
       try {
         const note = notes[i];
-         // note id  testing logic
-        if (note?.id === 464424997 || note?.id === "464424997") {
-          console.log("Processing note:", note);
-        } // todo uncomment
+
+        if (note?.type === "note") {
+          console.log("✅ Match found:", note);
+        } else {
+          continue;
+        }
+        // party fetch by id
+        const partyId = note?.party?.id;
+
+       const party = await fetchPartyById(partyId);
+        console.log("🎯 Party fetched:", party);
+        // console.log("Party Fetch By Id:",party);
+        return;
+
+
+
+        // note id  testing logic
+        // if (note?.id === 464424997 || note?.id === "464424997") {
+        //   console.log("Processing note:", note);
+        // } // todo uncomment
 
         let NotesId = null;
-
 
         const payload = buildHubSpotNotePayload(notes); // call the function for payload
 
         console.log(" Notes", notes);
         console.log("Payloads", payload);
 
-        // return; // todo remove after testing
+        return; // todo remove after testing
         // create  Notes in hubspot
         const create = await createHubSpotNote(payload);
         NotesId = create?.id || null;

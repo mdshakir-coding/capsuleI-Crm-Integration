@@ -808,7 +808,12 @@ async function updateHubSpotNote(noteId, payload) {
   }
 }
 
-// Search Notes Functon in Hubspot
+// Search company by Name
+
+
+
+
+
 
 export {
   associateContactDeal,
@@ -828,4 +833,5 @@ export {
   associateDealWithTask,
   createHubSpotNote,
   updateHubSpotNote,
+  
 };
