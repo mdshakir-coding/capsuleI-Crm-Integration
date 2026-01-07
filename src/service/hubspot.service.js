@@ -808,7 +808,92 @@ async function updateHubSpotNote(noteId, payload) {
   }
 }
 
-// Search company by Name
+// Accociate Note to company
+
+// async function associateNote(noteId, toObjectType, toObjectId) {
+//   if (!noteId || !toObjectId) {
+//     console.error("❌ Missing noteId or toObjectId");
+//     return;
+//   }
+
+//   const associationTypeMap = {
+//     companies: 190, // note_to_company
+//     contacts: 202,  // note_to_contact
+//     deals: 214      // note_to_deal
+//   };
+
+//   const associationTypeId = associationTypeMap[toObjectType];
+
+//   if (!associationTypeId) {
+//     throw new Error(`❌ Invalid toObjectType: ${toObjectType}`);
+//   }
+
+//   try {
+//     const response = await axios.put(
+//       `https://api.hubapi.com/crm/v3/objects/notes/${noteId}/associations/${toObjectType}/${toObjectId}/${associationTypeId}`,
+//       {},
+//       {
+//         headers: {
+//           Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+
+//     console.log(
+//       `✅ Note (${noteId}) associated with ${toObjectType} (${toObjectId})`
+//     );
+
+//     return response.data;
+//   } catch (error) {
+//     console.error(
+//       `❌ Failed to associate note with ${toObjectType}:`,
+//       error.response?.data || error.message
+//     );
+//     throw error;
+//   }
+// }
+async function associateNote(NoteId, CompanyId) {
+  try {
+    const url =
+      "https://api.hubapi.com/crm/v3/associations/note/company/batch/create";
+
+    const payload = {
+      inputs: [
+        {
+          from: { id: NoteId },
+          to: { id: CompanyId },
+          type: "note_to_company",
+          // from: { id: companyId },
+          // to: { id: NoteId },
+          // type: "note_to_company",
+        },
+      ],
+    };
+
+    const response = await axios.post(url, payload, {
+      headers: {
+        Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("✅ Company ↔ Note Associated:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "❌ Error associating company with note:",
+      error.response?.data || error.message
+    );
+
+    return {
+      success: false,
+      error: error.response?.data || error.message,
+    };
+  }
+}
+
+
 
 
 
@@ -833,5 +918,6 @@ export {
   associateDealWithTask,
   createHubSpotNote,
   updateHubSpotNote,
+  associateNote,
   
 };
