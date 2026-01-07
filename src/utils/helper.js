@@ -59,8 +59,8 @@ function buildHubSpotNotePayload(data = {}) {
   console.log("Raw note input data:", data);
 
   const properties = {
-    hs_note_body: data.hs_note_body || "Default note body",
-    hs_timestamp: toEpochMs(data.hs_timestamp || data.created_at || null), // required
+    hs_note_body: data.content,
+    hs_timestamp: toEpochMs(data.created_at ), // required
     
   };
 

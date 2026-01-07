@@ -69,13 +69,13 @@ async function syncNotes() {
         const note = notes[i];
 
         if (note?.activityType?.name === "Note") {
-          console.log("✅ Match found:", note);
+          // console.log("✅ Match found:", note);
         } else {
           continue;
         }
 
         // note id  testing logic
-        if (!(note?.id !== 466584186)) {
+        if ((note?.id !== 466584186)) {
           // console.log("Processing note:", note);
           continue;
         } // todo uncomment
@@ -83,7 +83,7 @@ async function syncNotes() {
         console.log("✅ Match found:", note);
         // return;
 
-        const payload = buildHubSpotNotePayload(notes); // call the function for payload
+        const payload = buildHubSpotNotePayload(note); // call the function for payload
 
         console.log(" Notes", notes);
         console.log("Payloads", payload);
@@ -91,7 +91,7 @@ async function syncNotes() {
         // return; // todo remove after testing
         // create  Notes in hubspot
         const create = await createHubSpotNote(payload);
-        NotesId = create?.id || null;
+        NotesId = create?.id;
         console.log("✅ Notes created", NotesId);
         // return; // todo remove after testing
 
