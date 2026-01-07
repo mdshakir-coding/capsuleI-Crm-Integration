@@ -56,6 +56,7 @@ async function syncNotes() {
   try {
     const notes = await fetchNotes(); // Fetch Notes from Capsule
     console.log("Notes Entries Fetched:", notes?.length);
+    // return;
 
     let startIndex = loadProgress();
 
@@ -69,30 +70,30 @@ async function syncNotes() {
         const note = notes[i];
 
         if (note?.activityType?.name === "Note") {
-          // console.log("✅ Match found:", note);
+          console.log("✅ Match found:", note.id);
         } else {
           continue;
         }
 
         // note id  testing logic
-        if ((note?.id !== 466584186)) {
-          // console.log("Processing note:", note);
-          continue;
-        } // todo uncomment
+        // if ((note?.id !== 466584186)) {
+        //   // console.log("Processing note:", note);
+        //   continue;
+        // } // todo uncomment
 
-        console.log("✅ Match found:", note);
+        // console.log("✅ Match found:", note.id);
         // return;
 
         const payload = buildHubSpotNotePayload(note); // call the function for payload
 
-        console.log(" Notes", notes);
-        console.log("Payloads", payload);
+        // console.log(" Notes", notes);
+        // console.log("Payloads", payload);
 
         // return; // todo remove after testing
         // create  Notes in hubspot
         const create = await createHubSpotNote(payload);
         NotesId = create?.id;
-        console.log("✅ Notes created", NotesId);
+        // console.log("✅ Notes created", NotesId);
         // return; // todo remove after testing
 
         // fetch deal from hubspot
@@ -104,14 +105,13 @@ async function syncNotes() {
         const partyId = note?.party?.id;
 
         const party = await fetchPartyById(partyId);
-        // console.log("🎯 Party fetched:", party);
-        // return;
+        console.log("🎯 Party fetched:", party.id);
 
         let companyid = null;
 
         // Search company by name
         const company = await searchCompanyByName(party?.name);
-        console.log("Company Fetched:", company);
+        console.log("Company Fetched:", company.id);
 
         // Create company if not exists
         if (!company) {
@@ -124,8 +124,8 @@ async function syncNotes() {
 
         // ✅ Associate NOTE with Company
         if (NotesId && companyid) {
-          console.log("🔋noteId", NotesId);
-          console.log("🔋companyid", companyid);
+          // console.log("🔋noteId", NotesId);
+          // console.log("🔋companyid", companyid);
 
           const noteCompanyResult = await associateNote(NotesId, companyid);
           console.log("Note Associated with Company", noteCompanyResult);
@@ -134,8 +134,8 @@ async function syncNotes() {
         // Associated company with dealId //todo
 
         if (dealId && companyid) {
-          console.log("🔋companyid", companyid);
-          console.log("🔋dealId", dealId);
+          // console.log("🔋companyid", companyid);
+          // console.log("🔋dealId", dealId);
 
           const contactResult = await associateDealToCompany(dealId, companyid);
 
@@ -145,8 +145,8 @@ async function syncNotes() {
         // Association conatact with deal
 
         if (contactid && dealId) {
-          console.log("🔋contactid", contactid);
-          console.log("🔋dealId", dealId);
+          // console.log("🔋contactid", contactid);
+          // console.log("🔋dealId", dealId);
 
           const contactResult = await associateContactDeal(contactid, dealId);
           console.log("Contact Associated with Deal", contactResult);
@@ -171,8 +171,8 @@ async function syncNotes() {
             // Assocaition conatact with company
 
             if (contactid && companyid) {
-              console.log("🔋contactid", contactid);
-              console.log("🔋companyid", companyid);
+              // console.log("🔋contactid", contactid);
+              // console.log("🔋companyid", companyid);
 
               const companyResult = await associateContactCompany(
                 contactid,
@@ -184,17 +184,17 @@ async function syncNotes() {
             // Associate note to deal id
 
             if (NotesId && dealId) {
-              console.log("🔋noteId", NotesId);
-              console.log("🔋dealId", dealId);
+              // console.log("🔋noteId", NotesId);
+              // console.log("🔋dealId", dealId);
 
-              const result = await associateNote(noteId, "deals", dealId);
+              const result = await associateNote(NotesId, "deals", dealId);
               console.log("✅ Note Associated with Deal", result);
             }
 
             // Associate note to contact id
             if (NotesId && contactid) {
-              console.log("🔋noteId:", NotesId);
-              console.log("🔋contactId:", contactid);
+              // console.log("🔋noteId:", NotesId);
+              // console.log("🔋contactId:", contactid);
 
               const result = await associateNote(NotesId, contactid);
               console.log("✅ Note Associated with Contact", result);
@@ -208,11 +208,11 @@ async function syncNotes() {
         // }
 
         // Save progress after successful processing
-        // saveProgress(i + 1);
-        return;
+        saveProgress(i + 1);
+        // return;
       } catch (error) {
         console.error(error);
-        // saveProgress(i);
+        saveProgress(i);
         // break; // todo remove after testing
       }
     }

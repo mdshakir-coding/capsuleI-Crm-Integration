@@ -60,7 +60,7 @@ function buildHubSpotNotePayload(data = {}) {
 
   const properties = {
     hs_note_body: data.content,
-    hs_timestamp: toEpochMs(data.created_at ), // required
+    hs_timestamp: toEpochMs(data.entryAt ), // required
     
   };
 

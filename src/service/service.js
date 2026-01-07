@@ -332,7 +332,7 @@ async function fetchNotes() {
 
       // Collect notes
       allNotes.push(...notes);
-      return allNotes; // todo remove after testing
+      // return allNotes; // todo remove after testing
 
       // Stop pagination when last page
       if (notes.length < perPage) {
@@ -355,8 +355,13 @@ async function fetchNotes() {
 // Party fetch based on party Id
 
 async function fetchPartyById(partyId) {
+  
 
   try {
+    if (!partyId) {
+      console.error("❌ Party ID is required");
+      return null;
+    }
     const response = await axios.get(
       `https://api.capsulecrm.com/api/v2/parties/${partyId}`,
       {
