@@ -303,7 +303,7 @@ async function fetchCapsuleParty(partyId) {
 // Fetch Notes from Capsule
 
 async function fetchNotes() {
-  let page = 0;
+  let page = 1;
   const perPage = 500;
 
   let allNotes = [];
